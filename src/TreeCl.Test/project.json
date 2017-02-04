@@ -1,0 +1,26 @@
+﻿{
+  "version": "1.0.0-*",
+
+  "testRunner": "mstest",
+
+  "dependencies": {
+    "dotnet-test-mstest": "1.1.2-preview",
+    "MSTest.TestFramework": "1.0.8-rc2",
+    "NETStandard.Library": "1.6.0",
+    "TreeCl": "*"
+  },
+
+  "frameworks": {
+    "netcoreapp1.6": {
+      "imports": "dnxcore50"
+    }
+  },
+
+  "runtimes": {
+    "win7-x64": {},
+    "win7-x86": {},
+    "win8-arm": {},
+    "osx.10.10-x64": {},
+    "linux-x64": {}
+  }
+}
