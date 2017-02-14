@@ -1,4 +1,5 @@
 ﻿using MartinCl2.Collections.Generic.Enumeration;
+using MartinCl2.Collections.Generic.Nodes;
 using MartinCl2.Collections.Generic.Nodes.Abstract;
 using System;
 using System.Collections;
@@ -171,13 +172,13 @@ namespace MartinCl2.Collections.Generic.Abstract
         {
             get
             {
-                List<TNode> ancestors;
+                List<BinaryTreeNodeAncestor<TNode>> ancestors;
                 TNode node = GeneralTryGetNode(key, TryGetSide.Exact, out ancestors);
                 if (node == null)
                 {
                     throw new KeyNotFoundException("This key doesn't exist.");
                 }
-                RecordExplicitGotNode(node, ancestors);
+                RecordExplicitlyAccessedNode(ancestors);
                 return node.Value;
             }
 
@@ -385,7 +386,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>Success</returns>
         private bool GeneralAdd(TKey key, TValue value, AddStrategy strategy)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode parent = GetParentBeforeInsert(key, out ancestors);
             TNode node = new TNode()
             {
@@ -424,14 +425,18 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <summary>
         /// Add a node to its parent. Override this method to do balancing but remember updating min and max node as well.
         /// </summary>
-        /// <param name="parent">Parent of the inserting node</param>
-        /// <param name="compareResult">Result of <code>Compare(node, parent)</code></param>
+        /// <param name="compareResult">Compare result between this node and its parent</param>
         /// <param name="node">The inserting node</param>
         /// <param name="ancestors">The ancestors path wherethe first element is the root and the last element is the parent</param>
-        protected virtual void AddToParent(int compareResult, TNode node, List<TNode> ancestors)
+        protected virtual void AddToParent(int compareResult, TNode node, List<BinaryTreeNodeAncestor<TNode>> ancestors)
         {
-            Debug.Assert(ancestors.First() == Root);
-            TNode parent = ancestors[ancestors.Count - 1];
+            Debug.Assert(compareResult != 0);
+            Debug.Assert(node != null);
+            Debug.Assert(ancestors != null);
+            Debug.Assert(ancestors.Count > 0);
+            Debug.Assert(ancestors[0].Node == Root);
+            BinaryTreeNodeAncestor<TNode> ancestorRecord = ancestors[ancestors.Count - 1];
+            TNode parent = ancestorRecord.Node;
             if (compareResult < 0)
             {
                 if (Compare(node.Key, MinNode.Key) < 0)
@@ -454,9 +459,8 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// Do some action when a node is explicitly being got. Override this method to record extra information or adjust the tree.
         /// Intentionally left blank. No specific action to do in the default implementation.
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="ancestors"></param>
-        protected virtual void RecordExplicitGotNode(TNode node, List<TNode> ancestors)
+        /// <param name="ancestors">Ancestors of the node. Should be non-empty. The first element is the root, and the last element is the node itself.</param>
+        protected virtual void RecordExplicitlyAccessedNode(List<BinaryTreeNodeAncestor<TNode>> ancestors)
         { }
 
         /// <summary>
@@ -466,7 +470,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns></returns>
         public TValue GetLeftClosestValue(TKey key)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Left, out ancestors);
             if (node == null)
             {
@@ -482,7 +486,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns></returns>
         public TValue GetRightClosestValue(TKey key)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Right, out ancestors);
             if (node == null)
             {
@@ -498,7 +502,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>Success</returns>
         public bool TryGetValue(TKey key, out TValue resultValue)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Exact, out ancestors);
             if (node == null)
             {
@@ -507,7 +511,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             }
             else
             {
-                RecordExplicitGotNode(node, ancestors);
+                RecordExplicitlyAccessedNode(ancestors);
                 resultValue = node.Value;
                 return true;
             }
@@ -521,7 +525,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         public bool TryGetLeftClosestValue(TKey key, out TValue resultValue)
         {
 
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Left, out ancestors);
             if (node == null)
             {
@@ -530,7 +534,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             }
             else
             {
-                RecordExplicitGotNode(node, ancestors);
+                RecordExplicitlyAccessedNode(ancestors);
                 resultValue = node.Value;
                 return true;
             }
@@ -543,7 +547,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>success</returns>
         public bool TryGetLeftClosestValue(TKey key, out TKey resultKey, out TValue resultValue)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Left, out ancestors);
             if (node == null)
             {
@@ -553,7 +557,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             }
             else
             {
-                RecordExplicitGotNode(node, ancestors);
+                RecordExplicitlyAccessedNode(ancestors);
                 resultKey = node.Key;
                 resultValue = node.Value;
                 return true;
@@ -567,7 +571,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>success</returns>
         public bool TryGetRightClosestValue(TKey key, out TValue resultValue)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Right, out ancestors);
             if (node == null)
             {
@@ -576,7 +580,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             }
             else
             {
-                RecordExplicitGotNode(node, ancestors);
+                RecordExplicitlyAccessedNode(ancestors);
                 resultValue = node.Value;
                 return true;
             }
@@ -589,7 +593,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>success</returns>
         public bool TryGetRightClosestValue(TKey key, out TKey resultKey, out TValue resultValue)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Right, out ancestors);
             if (node == null)
             {
@@ -599,7 +603,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             }
             else
             {
-                RecordExplicitGotNode(node, ancestors);
+                RecordExplicitlyAccessedNode(ancestors);
                 resultKey = node.Key;
                 resultValue = node.Value;
                 return true;
@@ -612,7 +616,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <param name="key"></param>
         /// <param name="ancestors"></param>
         /// <returns></returns>
-        protected TNode GetParentBeforeInsert(TKey key, out List<TNode> ancestors)
+        protected TNode GetParentBeforeInsert(TKey key, out List<BinaryTreeNodeAncestor<TNode>> ancestors)
         {
             return GeneralTryGetNode(key, TryGetSide.Parent, out ancestors);
         }
@@ -624,7 +628,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <param name="side">The prefered node side when the given key doesn't exist</param>
         /// <param name="ancestors">All ancestors along the searching path including the return value</param>
         /// <returns>Success</returns>
-        protected TNode GeneralTryGetNode(TKey key, TryGetSide side, out List<TNode> ancestors)
+        protected TNode GeneralTryGetNode(TKey key, TryGetSide side, out List<BinaryTreeNodeAncestor<TNode>> ancestors)
         {
             // The current node doing the iteration
             TNode current = Root;
@@ -633,22 +637,26 @@ namespace MartinCl2.Collections.Generic.Abstract
             // The most left ancestor that is right to the current node
             TNode rightAncestor = null;
             // All ancestors
-            ancestors = new List<TNode>();
+            ancestors = new List<BinaryTreeNodeAncestor<TNode>>();
+
+            BinaryTreeNodePosition previousPosition = BinaryTreeNodePosition.Root;
 
             // Do binary tree search
             while (current != null)
             {
+                ancestors.Add(new BinaryTreeNodeAncestor<TNode>(previousPosition, current));
                 int compareResult = Compare(key, current.Key);
-                ancestors.Add(current);
                 if (compareResult < 0)
                 {
                     rightAncestor = current;
                     current = current.LeftChild;
+                    previousPosition = BinaryTreeNodePosition.LeftChild;
                 }
                 else if (compareResult > 0)
                 {
                     leftAncestor = current;
                     current = current.RightChild;
+                    previousPosition = BinaryTreeNodePosition.RightChild;
                 }
                 else
                 {
@@ -673,7 +681,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             {
                 if (ancestors.Count > 0)
                 {
-                    return ancestors.Last();
+                    return ancestors[ancestors.Count - 1].Node;
                 }
                 else
                 {
@@ -792,7 +800,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>Success</returns>
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(item.Key, TryGetSide.Exact, out ancestors);
             if (node == null)
             {
@@ -805,7 +813,7 @@ namespace MartinCl2.Collections.Generic.Abstract
                 return false;
             }
             Count--;
-            RemoveFromParent(node, ancestors);
+            RemoveFromParent(ancestors);
             return true;
         }
 
@@ -816,7 +824,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns>Success</returns>
         public bool Remove(TKey key)
         {
-            List<TNode> ancestors;
+            List<BinaryTreeNodeAncestor<TNode>> ancestors;
             TNode node = GeneralTryGetNode(key, TryGetSide.Exact, out ancestors);
             if (node == null)
             {
@@ -824,21 +832,21 @@ namespace MartinCl2.Collections.Generic.Abstract
                 return false;
             }
             Count--;
-            RemoveFromParent(node, ancestors);
+            RemoveFromParent(ancestors);
             return true;
         }
 
         /// <summary>
         /// Remove a node from this tree. Override this method to do balancing but remember updating min and max node as well.
         /// </summary>
-        /// <param name="node">The node to be removed.</param>
-        /// <param name="ancestors">All ancestors of this node. The first element is the root of the tree and the last element is the node itself. If the node itself is not the root, the second last node is its parent.</param>
-        protected virtual void RemoveFromParent(TNode node, List<TNode> ancestors)
+        /// <param name="ancestors">All ancestors of this node. Should be non-empty. The first element is the root of the tree and the last element is the node to be removed. If the node itself is not the root, the second last node is its parent.</param>
+        protected virtual void RemoveFromParent(List<BinaryTreeNodeAncestor<TNode>> ancestors)
         {
-            Debug.Assert(node != null);
             Debug.Assert(ancestors != null);
-            Debug.Assert(Root == ancestors.First());
-            Debug.Assert(node == ancestors.Last());
+            Debug.Assert(ancestors.Count > 0);
+            Debug.Assert(Root == ancestors[0].Node);
+            BinaryTreeNodeAncestor<TNode> nodeRecord = ancestors[ancestors.Count - 1];
+            TNode node = nodeRecord.Node;
 
             // Find the node that will fill the node's original position (a child of a parent or the root)
             TNode substitude = node.LeftChild;
@@ -869,8 +877,8 @@ namespace MartinCl2.Collections.Generic.Abstract
             // Replace the removing node
             if (ancestors.Count > 1)
             {
-                TNode parent = ancestors[ancestors.Count - 2];
-                if (Compare(node.Key, parent.Key) < 0)
+                TNode parent = ancestors[ancestors.Count - 2].Node;
+                if (nodeRecord.Position == BinaryTreeNodePosition.LeftChild)
                 {
                     int compareResult = Compare(node.Key, MinNode.Key);
                     Debug.Assert(compareResult >= 0);
@@ -958,6 +966,23 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// <returns></returns>
         protected TNode RotateLeftRight(TNode node)
         {
+            Debug.Assert(node.RightChild != null);
+            Debug.Assert(node.RightChild.LeftChild != null);
+            TNode newParent = node.RightChild.LeftChild;
+            node.RightChild.LeftChild = newParent.RightChild;
+            newParent.RightChild = node.RightChild;
+            node.RightChild = newParent.LeftChild;
+            newParent.LeftChild = node;
+            return newParent;
+        }
+
+        /// <summary>
+        /// Right rotate then left rotate a node.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        protected TNode RotateRightLeft(TNode node)
+        {
             Debug.Assert(node.LeftChild != null);
             Debug.Assert(node.LeftChild.RightChild != null);
             TNode newParent = node.LeftChild.RightChild;
@@ -969,19 +994,36 @@ namespace MartinCl2.Collections.Generic.Abstract
         }
 
         /// <summary>
-        /// Right rotate then left rotate a node.
+        /// Left rotate then left rotate a node.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateRightLeft(TNode node)
+        protected TNode RotateLeftLeft(TNode node)
         {
             Debug.Assert(node.RightChild != null);
-            Debug.Assert(node.RightChild.LeftChild != null);
-            TNode newParent = node.RightChild.LeftChild;
-            node.RightChild.LeftChild = newParent.RightChild;
-            newParent.RightChild = node.RightChild;
-            node.RightChild = newParent.LeftChild;
-            newParent.LeftChild = node;
+            Debug.Assert(node.RightChild.RightChild != null);
+            TNode newParent = node.RightChild.RightChild;
+            node.RightChild.RightChild = newParent.LeftChild;
+            newParent.LeftChild = node.RightChild;
+            node.RightChild = newParent.LeftChild.LeftChild;
+            newParent.LeftChild.LeftChild = node;
+            return newParent;
+        }
+
+        /// <summary>
+        /// Right rotate then right rotate a node.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        protected TNode RotateRightRight(TNode node)
+        {
+            Debug.Assert(node.LeftChild != null);
+            Debug.Assert(node.LeftChild.LeftChild != null);
+            TNode newParent = node.LeftChild.LeftChild;
+            node.LeftChild.LeftChild = newParent.RightChild;
+            newParent.RightChild = node.LeftChild;
+            node.LeftChild = newParent.RightChild.RightChild;
+            newParent.RightChild.RightChild = node;
             return newParent;
         }
 
