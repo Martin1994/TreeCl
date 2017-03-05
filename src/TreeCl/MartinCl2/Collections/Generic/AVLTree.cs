@@ -8,31 +8,32 @@ using System.Threading.Tasks;
 namespace MartinCl2.Collections.Generic
 {
     /// <summary>
-    /// Basic binary search tree without any balancing strategy.
+    /// AVL tree. It keeps the tree in O(n) height where n is the number of nodes in the tree by making the
+    /// difference of height of left and right sub-trees no more than 1.
     /// This implementation is not thread safe.
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public sealed class BinarySearchTree<TKey, TValue> : AbstractBinarySearchTree<TKey, TValue, BinaryTreeNode<TKey, TValue>>
+    public sealed class AVLTree<TKey, TValue> : AbstractAVLTree<TKey, TValue, AVLTreeNode<TKey, TValue>>
     {
         /// <summary>
         /// Create an empty binary search tree using the default comparer.
         /// </summary>
-        public BinarySearchTree() : base()
+        public AVLTree() : base()
         { }
 
         /// <summary>
         /// Create an empty binary search tree using a given comparer.
         /// </summary>
         /// <param name="comparer">Key comparer</param>
-        public BinarySearchTree(IComparer<TKey> comparer) : base(comparer)
+        public AVLTree(IComparer<TKey> comparer) : base(comparer)
         { }
 
         /// <summary>
         /// Create a balanced binary search tree with given key value pairs using the default comparer.
         /// </summary>
         /// <param name="data"></param>
-        public BinarySearchTree(ICollection<KeyValuePair<TKey, TValue>> data) : base(data)
+        public AVLTree(ICollection<KeyValuePair<TKey, TValue>> data) : base(data)
         { }
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace MartinCl2.Collections.Generic
         /// </summary>
         /// <param name="data"></param>
         /// <param name="comparer">Key comparer</param>
-        public BinarySearchTree(ICollection<KeyValuePair<TKey, TValue>> data, IComparer<TKey> comparer) : base(data, comparer)
+        public AVLTree(ICollection<KeyValuePair<TKey, TValue>> data, IComparer<TKey> comparer) : base(data, comparer)
         { }
     }
 }

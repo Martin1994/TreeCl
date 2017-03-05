@@ -9,6 +9,7 @@ namespace MartinCl2.Collections.Generic
 {
     /// <summary>
     /// Splay tree. After every operations, a related node will be splayed to the root.
+    /// This implementation is not thread safe.
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
@@ -16,7 +17,6 @@ namespace MartinCl2.Collections.Generic
     {
         /// <summary>
         /// Create an empty binary search tree using the default comparer.
-        /// This implementation is not thread safe.
         /// </summary>
         public SplayTree() : base()
         { }

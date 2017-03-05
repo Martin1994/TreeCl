@@ -81,14 +81,14 @@ namespace MartinCl2.Collections.Generic.Abstract
                         }
                         else
                         {
-                            rotateResult = RotateLeftRight(ancestors[currentDepth - 2].Node);
+                            rotateResult = RotateRightLeft(ancestors[currentDepth - 2].Node);
                         }
                     }
                     else
                     {
                         if (ancestors[currentDepth - 1].Position == BinaryTreeNodePosition.LeftChild)
                         {
-                            rotateResult = RotateRightLeft(ancestors[currentDepth - 2].Node);
+                            rotateResult = RotateLeftRight(ancestors[currentDepth - 2].Node);
                         }
                         else
                         {

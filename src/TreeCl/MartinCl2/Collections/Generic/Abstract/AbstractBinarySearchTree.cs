@@ -45,7 +45,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             /// <summary>
             /// Find the deepest ancestor.
             /// The output node would be the parent if the given key were going to be inserted into the tree.
-            /// <see>GeneralTryGetValue</see>
+            /// <see>GeneralTryGetNode</see>
             /// </summary>
             Parent = 2
         }
@@ -327,6 +327,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// This method construct a sub-tree of a sub-range of the given node array and then
         /// return the root of this sub-tree.
         /// Min and max must be properly set before calling this method.
+        /// Override this method to update extra node fields.
         /// </summary>
         /// <param name="nodes">Sorted nodes to construct</param>
         /// <param name="start">Starting offset of the nodes array</param>
@@ -416,8 +417,22 @@ namespace MartinCl2.Collections.Generic.Abstract
             }
             else
             {
-                AddToParent(compareResult, node, ancestors);
                 Count++;
+                if (compareResult < 0)
+                {
+                    if (Compare(node.Key, MinNode.Key) < 0)
+                    {
+                        MinNode = node;
+                    }
+                }
+                else
+                {
+                    if (Compare(node.Key, MaxNode.Key) > 0)
+                    {
+                        MaxNode = node;
+                    }
+                }
+                AddToParent(compareResult, node, ancestors);
                 return true;
             }
         }
@@ -439,18 +454,10 @@ namespace MartinCl2.Collections.Generic.Abstract
             TNode parent = ancestorRecord.Node;
             if (compareResult < 0)
             {
-                if (Compare(node.Key, MinNode.Key) < 0)
-                {
-                    MinNode = node;
-                }
                 parent.LeftChild = node;
             }
             else
             {
-                if (Compare(node.Key, MaxNode.Key) > 0)
-                {
-                    MaxNode = node;
-                }
                 parent.RightChild = node;
             }
         }
@@ -476,6 +483,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             {
                 throw new KeyNotFoundException("This key is less than any existing keys.");
             }
+            RecordExplicitlyAccessedNode(ancestors);
             return node.Value;
         }
 
@@ -492,6 +500,7 @@ namespace MartinCl2.Collections.Generic.Abstract
             {
                 throw new KeyNotFoundException("This key is larger than any existing keys.");
             }
+            RecordExplicitlyAccessedNode(ancestors);
             return node.Value;
         }
 
@@ -837,7 +846,8 @@ namespace MartinCl2.Collections.Generic.Abstract
         }
 
         /// <summary>
-        /// Remove a node from this tree. Override this method to do balancing but remember updating min and max node as well.
+        /// Remove a node from this tree.
+        /// Override this method to do balancing but remember to update min and max node as well.
         /// </summary>
         /// <param name="ancestors">All ancestors of this node. Should be non-empty. The first element is the root of the tree and the last element is the node to be removed. If the node itself is not the root, the second last node is its parent.</param>
         protected virtual void RemoveFromParent(List<BinaryTreeNodeAncestor<TNode>> ancestors)
@@ -854,6 +864,11 @@ namespace MartinCl2.Collections.Generic.Abstract
             {
                 // Left subtree doesn't exist
                 substitude = node.RightChild;
+            }
+            else if (node.RightChild == null)
+            {
+                // Right subtree doesn't exist
+                // Do nothing
             }
             else if (substitude.RightChild == null)
             {
@@ -873,8 +888,8 @@ namespace MartinCl2.Collections.Generic.Abstract
                 substitude.LeftChild = node.LeftChild;
                 substitude.RightChild = node.RightChild;
             }
-
-            // Replace the removing node
+            
+            // Update min and max and replace the removing node
             if (ancestors.Count > 1)
             {
                 TNode parent = ancestors[ancestors.Count - 2].Node;
@@ -936,7 +951,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateLeft(TNode node)
+        protected static TNode RotateLeft(TNode node)
         {
             Debug.Assert(node.RightChild != null);
             TNode newParent = node.RightChild;
@@ -950,7 +965,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateRight(TNode node)
+        protected static TNode RotateRight(TNode node)
         {
             Debug.Assert(node.LeftChild != null);
             TNode newParent = node.LeftChild;
@@ -964,7 +979,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateLeftRight(TNode node)
+        protected static TNode RotateRightLeft(TNode node)
         {
             Debug.Assert(node.RightChild != null);
             Debug.Assert(node.RightChild.LeftChild != null);
@@ -981,7 +996,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateRightLeft(TNode node)
+        protected static TNode RotateLeftRight(TNode node)
         {
             Debug.Assert(node.LeftChild != null);
             Debug.Assert(node.LeftChild.RightChild != null);
@@ -998,7 +1013,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateLeftLeft(TNode node)
+        protected static TNode RotateLeftLeft(TNode node)
         {
             Debug.Assert(node.RightChild != null);
             Debug.Assert(node.RightChild.RightChild != null);
@@ -1015,7 +1030,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected TNode RotateRightRight(TNode node)
+        protected static TNode RotateRightRight(TNode node)
         {
             Debug.Assert(node.LeftChild != null);
             Debug.Assert(node.LeftChild.LeftChild != null);
@@ -1048,6 +1063,24 @@ namespace MartinCl2.Collections.Generic.Abstract
                 Debug.Assert(node.RightChild == null || Compare(node.RightChild.Key, node.Key) >= 0);
                 Verify(node.LeftChild);
                 Verify(node.RightChild);
+            }
+        }
+
+        /// <summary>
+        /// Verify if a substitude node in deleting process is valid.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="substitude"></param>
+        [Conditional("DEBUG")]
+        protected void VerifySubstitude(TNode node, TNode substitude)
+        {
+            if (node.LeftChild != null)
+            {
+                Debug.Assert(Compare(node.LeftChild.Key, substitude.Key) < 0);
+            }
+            if (node.RightChild != null)
+            {
+                Debug.Assert(Compare(node.RightChild.Key, substitude.Key) > 0);
             }
         }
     }
