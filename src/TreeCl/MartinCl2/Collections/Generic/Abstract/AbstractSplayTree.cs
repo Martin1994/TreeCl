@@ -25,6 +25,7 @@ namespace MartinCl2.Collections.Generic.Abstract
 
         /// <summary>
         /// Create an empty splay tree using a given comparer.
+        /// <param name="comparer"></param>
         /// </summary>
         public AbstractSplayTree(IComparer<TKey> comparer) : base(comparer)
         { }
@@ -33,6 +34,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// Create a balanced splay tree with given key value pairs using the default comparer.
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="comparer"></param>
         public AbstractSplayTree(ICollection<KeyValuePair<TKey, TValue>> data) : base(data)
         { }
 
@@ -40,6 +42,7 @@ namespace MartinCl2.Collections.Generic.Abstract
         /// Create a balanced binary search tree with given key value pairs using a given comparer.
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="comparer"></param>
         public AbstractSplayTree(ICollection<KeyValuePair<TKey, TValue>> data, IComparer<TKey> comparer) : base(data, comparer)
         { }
 

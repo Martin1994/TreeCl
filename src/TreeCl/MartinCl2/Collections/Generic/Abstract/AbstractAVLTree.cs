@@ -9,8 +9,8 @@ namespace MartinCl2.Collections.Generic.Abstract
     /// Abstract AVL tree.
     /// Since every node in an AVL tree satisfies that the difference between height of left and right
     /// sub-tree is never greater than 1, it guarantees an O(log n) height.
-    /// This implementation records the actual tree height instead of the difference of sub-tree's height
-    /// (1, 0, -1) as an AVL tree implementation usually does.
+    /// This implementation records the actual tree height instead of balance factor (i.e. the difference
+    /// between the sub-trees' height: -1, 0 or 1) as an AVL tree implementation usually does.
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
@@ -45,7 +45,6 @@ namespace MartinCl2.Collections.Generic.Abstract
                 node.UpdateHeight();
             }
             return node;
-            
         }
 
         /// <summary>

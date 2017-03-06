@@ -76,13 +76,21 @@ namespace MartinCl2.Collections.Generic.Tests
         public void RandomTest()
         {
             IBinarySearchTree<byte, int> bst = CreateBST<byte, int>();
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 Random rnd = new Random();
                 int value = rnd.Next();
                 byte key = (byte)(value % (int)byte.MaxValue);
                 bst[key] = value;
                 Assert.AreEqual(value, bst[key]);
+                if (i % 10 == 0)
+                {
+                    bst.Remove(bst.Max.Key);
+                }
+                if (i % 10 == 5)
+                {
+                    bst.Remove(bst.Min.Key);
+                }
             }
         }
 

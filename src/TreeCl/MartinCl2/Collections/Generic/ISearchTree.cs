@@ -14,6 +14,16 @@ namespace MartinCl2.Collections.Generic
     public interface IBinarySearchTree<TKey, TValue> : IDictionary<TKey, TValue>
     {
         /// <summary>
+        /// Get the maximun key
+        /// </summary>
+        KeyValuePair<TKey, TValue> Max { get; }
+
+        /// <summary>
+        /// Get the minimum key
+        /// </summary>
+        KeyValuePair<TKey, TValue> Min { get; }
+
+        /// <summary>
         /// Get all keys in the tree
         /// </summary>
         /// <param name="order"></param>

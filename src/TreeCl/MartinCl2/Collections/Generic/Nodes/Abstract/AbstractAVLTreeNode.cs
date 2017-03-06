@@ -28,7 +28,7 @@ namespace MartinCl2.Collections.Generic.Nodes.Abstract
         public int Height
         {
             get { return _height; }
-            set { _height = value; }
+            private set { _height = value; }
         }
 
         /// <summary>
